@@ -42,6 +42,18 @@ public class ManageServiceImpl implements ManageService {
     @Autowired
     private SpuSaleAttrValueMapper spuSaleAttrValueMapper;
 
+    @Autowired
+    private SkuInfoMapper skuInfoMapper;
+
+    @Autowired
+    private SkuImageMapper skuImageMapper;
+
+    @Autowired
+    private SkuSaleAttrValueMapper skuSaleAttrValueMapper;
+
+    @Autowired
+    private SkuAttrValueMapper skuAttrValueMapper;
+
 
     @Override
     public List<BaseCatalog1> getCatalog1() {
@@ -50,105 +62,89 @@ public class ManageServiceImpl implements ManageService {
 
     @Override
     public List<BaseCatalog2> getCatalog2(String catalog1Id) {
-
+//        return baseCatalog2Mapper.selectByExample();
+        // select * from basecatalog2 from where catalog1Id= ？
         BaseCatalog2 baseCatalog2 = new BaseCatalog2();
         baseCatalog2.setCatalog1Id(catalog1Id);
-
         return baseCatalog2Mapper.select(baseCatalog2);
     }
 
     @Override
     public List<BaseCatalog2> getCatalog2(BaseCatalog2 baseCatalog2) {
-
         return baseCatalog2Mapper.select(baseCatalog2);
     }
 
-    /**
-     * 查询三级分类
-     * @param baseCatalog3
-     * @return
-     */
     @Override
     public List<BaseCatalog3> getCatalog3(BaseCatalog3 baseCatalog3) {
         return baseCatalog3Mapper.select(baseCatalog3);
     }
 
-    /**
-     * 查询平台属性列表
-     * @param baseAttrInfo
-     * @return
-     */
     @Override
     public List<BaseAttrInfo> getAttrInfoList(BaseAttrInfo baseAttrInfo) {
+        // select * from baseAttrInfo where catalog3Id = ?
         return baseAttrInfoMapper.select(baseAttrInfo);
+
+
+
     }
 
     @Override
     @Transactional
     public void saveAttrInfo(BaseAttrInfo baseAttrInfo) {
-        //修改
-        if (baseAttrInfo.getId()!=null && baseAttrInfo.getId().length()>0) {
-            baseAttrInfoMapper.updateByPrimaryKeySelective(baseAttrInfo);
-        }else{
 
-            //要分别插入两张表中 baseAttrInfo，baseAttrValue
-            //插入baseAttrInfo中
+        // 修改！ baseAttrInfo
+        if (baseAttrInfo.getId()!=null && baseAttrInfo.getId().length()>0){
+            baseAttrInfoMapper.updateByPrimaryKeySelective(baseAttrInfo);
+        }else {
+            // 保存！
+            // baseAttrInfo 代表页面传递过来的数据！
+            // 分别插入到两张表 baseAttrInfo ，baseAttrValue
+            // attrName , catalog3Id
+            // System.out.println("插入之前："+baseAttrInfo.getId());
             baseAttrInfoMapper.insertSelective(baseAttrInfo);
         }
-
-        //baseAttrValue 修改 先删除原来的数据，再新增所有的数据
+        System.out.println("插入之后："+baseAttrInfo.getId());
+        //  baseAttrValue  修改 {先删除原有数据，在新增所有的数据！}
         // delete * from baseAttrValue where attrId = ? baseAttrInfo.getId()
-
         BaseAttrValue baseAttrValueDel = new BaseAttrValue();
         baseAttrValueDel.setAttrId(baseAttrInfo.getId());
         baseAttrValueMapper.delete(baseAttrValueDel);
         System.out.println("删除数据");
 
-
-        //插入到baseAttrValue
+        // baseAttrValue |  接收baseAttrValue 的集合
         List<BaseAttrValue> attrValueList = baseAttrInfo.getAttrValueList();
-
-        if (attrValueList !=null && attrValueList.size()>0) {
+        if (attrValueList!=null && attrValueList.size()>0){
             for (BaseAttrValue baseAttrValue : attrValueList) {
-                //保存数据 主键id要添加进去
-                baseAttrValue.setAttrId(baseAttrInfo.getId());
-
+                // 保存数据  valueName , attrId  = baseAttrInfo.getId();
+                baseAttrValue.setAttrId(baseAttrInfo.getId()); // baseAttrInfo.getId();主键
                 baseAttrValueMapper.insertSelective(baseAttrValue);
             }
         }
-
-
-
     }
 
     @Override
     public List<BaseAttrValue> getAttrValueList(String attrId) {
-
         BaseAttrValue baseAttrValue = new BaseAttrValue();
         baseAttrValue.setAttrId(attrId);
-
         return baseAttrValueMapper.select(baseAttrValue);
-
     }
 
-
     @Override
-    public BaseAttrInfo getAttrInfo(String attrId) {
+    public BaseAttrInfo getAtrrInfo(String attrId) {
+        // select * from baseAttrInfo where id = attrId;
         BaseAttrInfo baseAttrInfo = baseAttrInfoMapper.selectByPrimaryKey(attrId);
 
+        // 赋值
         baseAttrInfo.setAttrValueList(getAttrValueList(attrId));
         return baseAttrInfo;
     }
-
     @Override
-    public List<SpuInfo> getSpuInfoList(String catalog3Id) {
-        SpuInfo spuInfo = new SpuInfo();
-        spuInfo.setCatalog3Id(catalog3Id);
-        return spuInfoMapper.select(spuInfo);
+    public List<SpuInfo> getSpuList(String catalog3Id) {
+        return null;
     }
 
     @Override
-    public List<SpuInfo> getSpuInfoList(SpuInfo spuInfo) {
+    public List<SpuInfo> getSpuList(SpuInfo spuInfo) {
         return spuInfoMapper.select(spuInfo);
     }
 
@@ -160,35 +156,94 @@ public class ManageServiceImpl implements ManageService {
     @Override
     @Transactional
     public void saveSpuInfo(SpuInfo spuInfo) {
-        //spuInfo保存着所有数据
+        // spuInfo 表示从前台页面传递过来的数据
+//        spuInfo
         spuInfoMapper.insertSelective(spuInfo);
-        //spuImage
+//        spuImage'
         List<SpuImage> spuImageList = spuInfo.getSpuImageList();
-        if (checkListIsEmpty(spuImageList)) {
+
+        if (spuImageList!=null && spuImageList.size()>0){
             for (SpuImage spuImage : spuImageList) {
                 spuImage.setSpuId(spuInfo.getId());
                 spuImageMapper.insertSelective(spuImage);
-
             }
         }
-
-        //spuSaleAttr
+//        spuSaleAttr
         List<SpuSaleAttr> spuSaleAttrList = spuInfo.getSpuSaleAttrList();
-        if (checkListIsEmpty(spuSaleAttrList)) {
+        if (spuSaleAttrList!=null && spuSaleAttrList.size()>0){
             for (SpuSaleAttr spuSaleAttr : spuSaleAttrList) {
                 spuSaleAttr.setSpuId(spuInfo.getId());
                 spuSaleAttrMapper.insertSelective(spuSaleAttr);
 
-                List<SpuSaleAttrValue> saleAttrValueList = spuSaleAttr.getSpuSaleAttrValueList();
-                if (checkListIsEmpty(saleAttrValueList)) {
-                    for (SpuSaleAttrValue spuSaleAttrValue : saleAttrValueList) {
+                //        spuSaleAttrValue
+                List<SpuSaleAttrValue> spuSaleAttrValueList = spuSaleAttr.getSpuSaleAttrValueList();
+//                if (spuSaleAttrValueList!=null && spuSaleAttrValueList.size()>0){
+//                    for (SpuSaleAttrValue spuSaleAttrValue : spuSaleAttrValueList) {
+//                        spuSaleAttrValue.setSpuId(spuInfo.getId());
+//                        spuSaleAttrValueMapper.insertSelective(spuSaleAttrValue);
+//                    }
+//                }
+                if(checkListIsEmpty(spuSaleAttrValueList)){
+                    for (SpuSaleAttrValue spuSaleAttrValue : spuSaleAttrValueList) {
                         spuSaleAttrValue.setSpuId(spuInfo.getId());
                         spuSaleAttrValueMapper.insertSelective(spuSaleAttrValue);
                     }
                 }
             }
         }
+    }
 
+    @Override
+    public List<SpuImage> getSpuImageList(SpuImage spuImage) {
+        return spuImageMapper.select(spuImage);
+    }
+
+
+    @Override
+    public List<BaseAttrInfo> getAttrInfoList(String catalog3Id) {
+        /*
+        SELECT * FROM base_attr_info bai INNER JOIN base_attr_value bav ON bai.id = bav.attr_id WHERE bai.catalog3_id=61;
+         */
+        return baseAttrInfoMapper.selectBaseAttrInfoListByCatalog3Id(catalog3Id);
+
+    }
+
+    @Override
+    public List<SpuSaleAttr> getSpuSaleAttrList(String spuId) {
+        return spuSaleAttrMapper.selectSpuSaleAttrList(spuId);
+    }
+
+    //保存商品属性
+    @Override
+    @Transactional
+    public void saveSkuInfo(SkuInfo skuInfo) {
+
+        skuInfoMapper.insertSelective(skuInfo);
+
+        List<SkuAttrValue> skuAttrValueList = skuInfo.getSkuAttrValueList();
+        if (checkListIsEmpty(skuAttrValueList)) {
+            for (SkuAttrValue skuAttrValue : skuAttrValueList) {
+                skuAttrValue.setSkuId(skuInfo.getId());
+                skuAttrValueMapper.insertSelective(skuAttrValue);
+
+            }
+        }
+
+        List<SkuSaleAttrValue> skuSaleAttrValueList = skuInfo.getSkuSaleAttrValueList();
+        if (checkListIsEmpty(skuSaleAttrValueList)) {
+            for (SkuSaleAttrValue skuSaleAttrValue : skuSaleAttrValueList) {
+                skuSaleAttrValue.setSkuId(skuInfo.getId());
+                skuSaleAttrValueMapper.insertSelective(skuSaleAttrValue);
+            }
+        }
+
+        List<SkuImage> skuImageList = skuInfo.getSkuImageList();
+        if (checkListIsEmpty(skuImageList)) {
+            for (SkuImage skuImage : skuImageList) {
+                skuImage.setSkuId(skuInfo.getId());
+                skuImageMapper.insertSelective(skuImage);
+            }
+        }
     }
 
     public <T> boolean checkListIsEmpty(List<T> list){

@@ -20,7 +20,7 @@ public class SpuManageController {
     public List<SpuInfo> spuList(String catalog3Id){
         SpuInfo spuInfo = new SpuInfo();
         spuInfo.setCatalog3Id(catalog3Id);
-        List<SpuInfo> spuInfoList = manageService.getSpuInfoList(spuInfo);
+        List<SpuInfo> spuInfoList = manageService.getSpuList(spuInfo);
         return  spuInfoList;
     }
 

@@ -6,37 +6,109 @@ import java.util.List;
 
 public interface ManageService {
 
-    //获取一级分类
+
+    /**
+     * 查询所有的一级分类数据
+     * @return
+     */
     List<BaseCatalog1> getCatalog1();
 
-    //获取二级分类
+
+    /**
+     * 根据一级分类Id 查询二级分类数据
+     * @param catalog1Id
+     * @return
+     */
     List<BaseCatalog2> getCatalog2(String catalog1Id);
 
-    //根据条件查询
+    /**
+     * 根据属性查询二级分类数据
+     * @param baseCatalog2
+     * @return
+     */
     List<BaseCatalog2> getCatalog2(BaseCatalog2 baseCatalog2);
 
-    //查询三级分类
+    /**
+     * 查询三级分类数据
+     * @param baseCatalog3
+     * @return
+     */
     List<BaseCatalog3> getCatalog3(BaseCatalog3 baseCatalog3);
 
-    //查询所有平台属性列表
+    /**
+     * 根据属性查询平台属性数据
+     * @param baseAttrInfo
+     * @return
+     */
     List<BaseAttrInfo> getAttrInfoList(BaseAttrInfo baseAttrInfo);
 
-    //保存平台属性值
+    /**
+     * 保存平台属性-平台属性值
+     * @param baseAttrInfo
+     */
     void saveAttrInfo(BaseAttrInfo baseAttrInfo);
 
-    //根据attrId获取attrValueList集合
+    /**
+     * 通过attrId 查询平台属性值集合
+     * @param attrId
+     * @return
+     */
     List<BaseAttrValue> getAttrValueList(String attrId);
 
-    BaseAttrInfo getAttrInfo(String attrId);
+    /**
+     * 通过平台属性attrId 查询平台属性对象
+     * @param attrId
+     * @return
+     */
+    BaseAttrInfo getAtrrInfo(String attrId);
 
-    List<SpuInfo> getSpuInfoList(String catalog3Id);
+    /**
+     *
+     * @param catalog3Id
+     * @return
+     */
+    List<SpuInfo> getSpuList(String catalog3Id);
 
-    List<SpuInfo> getSpuInfoList(SpuInfo spuInfo);
+    /**
+     * 根据spuInfo 属性查询spuInfo集合
+     * @param spuInfo
+     * @return
+     */
+    List<SpuInfo> getSpuList(SpuInfo spuInfo);
 
-    // 查询基本销售属性表
+
+    /**
+     * 查询所有的销售属性
+     * @return
+     */
     List<BaseSaleAttr> getBaseSaleAttrList();
 
-
-    //保存销售属性
+    /**
+     * 保存spuInfo 数据
+     * @param spuInfo
+     */
     void saveSpuInfo(SpuInfo spuInfo);
+
+    /**
+     * 根据属性查询图片集合
+     * @param spuImage
+     * @return
+     */
+    List<SpuImage> getSpuImageList(SpuImage spuImage);
+
+    /**
+     * 根据三级分类Id 查询数据
+     * @param catalog3Id
+     * @return
+     */
+    List<BaseAttrInfo> getAttrInfoList(String catalog3Id);
+
+
+    List<SpuSaleAttr> getSpuSaleAttrList(String spuId);
+
+    /**
+     * 保存具体商品的属性
+     * @param skuInfo
+     */
+    void saveSkuInfo(SkuInfo skuInfo);
 }
